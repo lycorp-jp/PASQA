@@ -1,53 +1,62 @@
-# pasqa
+# PASQA
 
-This repository contains materials developed by LY Corporation and is temporarily open-sourced for the purpose of a {paper URL}.
+This repository contains materials developed by LY Corporation and is temporarily open-sourced for the purpose of a {paper URL, coming soon}.
 
 - **Temporary Release**: This repository is temporarily available as open-source. Therefore this repository may be turned into read-only or private anytime.
 - **Attribution**: All code and materials in this repository are owned by LY Corporation.
 
 ## Project Overview
 
-Minimal standalone inference package for the **AccentErrorMOS** SSLMOS model.
-
-No dependency on the `sheet` training repository. Just point it at a checkpoint.
-
-- Architecture: `SSLMOS` with `wav2vec2` (s3prl) backbone
-- Mora cross-attention (`use_mora=True`) — mora token list is **required** at inference
-- Frame-level error head (`use_error_head=True`) — outputs per-frame sigmoid probabilities
-- Speaker GRL (`use_speaker_grl=True`) — included in model definition, inactive at inference
-
-Vocab is resolved from the model's config (`mora_vocab_path`), walking up ancestor directories from the config file until the path is found.
-`src/pasqa/vocab.txt` is bundled as a fallback when the config's vocab path cannot be located.
+**PASQA (Pitch-Accent-focused Speech Quality Assessment)** is a mean opinion score (MOS)
+prediction model that explicitly targets pitch-accent correctness. It is trained on a
+controlled Japanese accent-error dataset, constructed by
+changing accent patterns using an accent-controllable text-to-speech system, with a pseudo
+accent-quality score computed from the accent-error rate. PASQA builds on self-supervised
+representations and employs mora-conditioned fusion, ranking loss, an auxiliary accent-error
+localization task, and speaker-invariant training.
 
 ## Installation and Usage
 
+### 1. Install
+
 ```bash
-cd /path/to/pasqa
 uv sync
 ```
+
+### 2. Download the pretrained model
+[![Hugging Face](https://img.shields.io/badge/🤗%20Hugging%20Face-PASQA-yellow)](https://huggingface.co/ly-corporation/PASQA)
+
+Download the checkpoint `.pkl` and its `config.yml` from [Hugging Face](https://huggingface.co/ly-corporation/PASQA) and place them together anywhere you like. 
+The layout below (e.g. a `pretrained/` directory) is only an example:
+
+```
+pasqa/
+├── pretrained/
+│   ├── checkpoint-100000steps.pkl   # model weights
+│   └── config.yml            # auto-discovered from the checkpoint's directory
+└── src/pasqa/vocab.txt       # bundled mora vocab (fallback)
+```
+
+The mora vocab is resolved from the config's `mora_vocab_path`; if that path cannot be
+found, the bundled `src/pasqa/vocab.txt` is used automatically.
+
+### 3. Run inference
 
 ```python
 from pasqa import PasqaPredictor
 
 predictor = PasqaPredictor(
-    checkpoint="path/to/exp/20260221_.../checkpoint-best.pkl",
-    # config is auto-discovered from checkpoint directory (config.yml)
-    # device defaults to 'cuda' if available
+    checkpoint="pretrained/checkpoint-best.pkl",
+    # config is auto-discovered from the checkpoint's directory (config.yml)
+    # device defaults to 'cuda' if available, else 'cpu'
 )
 
 result = predictor.predict(
     wav_path="audio.wav",
-    mora=["カ", "タ", "カ", "ナ"],
+    mora=["ア", "シ", "タ", "ノ", "テ", "ン", "キ", "ハ", "ハ", "レ", "デ", "ス"],  # katakana mora list is REQUIRED
 )
-# result: {"mos": float, "frame_error_logits": np.ndarray, "frame_lengths": int}
-print(result["mos"])
 
-# Or with a raw tensor
-import torch
-result = predictor.predict(
-    wav=torch.zeros(16000),
-    mora=["ア", "イ", "ウ"],
-)
+print(result["mos"])  # predicted MOS, ~1–5
 ```
 
 ## Acknowledgements
