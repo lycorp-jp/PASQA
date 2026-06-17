@@ -5,11 +5,11 @@ build-backend = "hatchling.build"
 [project]
 name = "pasqa"
 version = "0.1.0"
-description = "Inference package for the Pitch-Accent Quality Assessment Model"
-requires-python = ">=3.9,<3.13"
+description = "Inference package for the Pitch-Accent-Focused Speech Quality Assessment Model"
+requires-python = ">=3.10,<3.11"
 dependencies = [
-    "torch>=2.3.0",
-    "torchaudio>=2.3.0",
+    "torch>=2.3.0,<2.9",
+    "torchaudio>=2.3.0,<2.9",
     "soundfile",
     "s3prl==0.4.10",
     "pyyaml",
