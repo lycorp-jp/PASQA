@@ -1,6 +1,8 @@
 # PASQA
 
-This repository contains materials developed by LY Corporation and is temporarily open-sourced for the purpose of a {paper URL, coming soon}.
+This repository contains materials developed by LY Corporation and is temporarily open-sourced for the purpose of a [paper](https://arxiv.org/abs/2606.20137).
+
+Accepted to INTERSPEECH 2026
 
 - **Temporary Release**: This repository is temporarily available as open-source. Therefore this repository may be turned into read-only or private anytime.
 - **Attribution**: All code and materials in this repository are owned by LY Corporation.
